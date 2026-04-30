@@ -9,6 +9,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using ClipyWin.Interop;
 using ClipyWin.Models;
 using ClipyWin.Services;
@@ -184,7 +185,7 @@ public sealed class MenuManager : IDisposable
         var marked = _settings.GetBool(Constants.Settings.MenuItemsAreMarkedWithNumbers, true);
         var startFromZero = _settings.GetBool(Constants.Settings.MenuItemsTitleStartWithZero, false);
 
-        menu.Items.Add(new MenuItem { Header = "History", IsEnabled = false });
+        menu.Items.Add(new MenuItem { Header = Loc.T("menu.history"), IsEnabled = false });
 
         var clips = _db.GetClips(newestFirst: true, take: maxHistory).ToList();
 
@@ -231,10 +232,10 @@ public sealed class MenuManager : IDisposable
             var snippetsRoot = new MenuItem { Header = Loc.T("menu.snippets") };
             foreach (var folder in folders.Where(f => f.Enable))
             {
-                var folderItem = new MenuItem { Header = string.IsNullOrWhiteSpace(folder.Title) ? "(untitled)" : folder.Title };
+                var folderItem = new MenuItem { Header = string.IsNullOrWhiteSpace(folder.Title) ? Loc.T("menu.untitled") : folder.Title };
                 foreach (var snippet in folder.Snippets.Where(s => s.Enable).OrderBy(s => s.Index))
                 {
-                    var snippetItem = new MenuItem { Header = string.IsNullOrWhiteSpace(snippet.Title) ? "(untitled)" : snippet.Title };
+                    var snippetItem = new MenuItem { Header = string.IsNullOrWhiteSpace(snippet.Title) ? Loc.T("menu.untitled") : snippet.Title };
                     var captured = snippet;
                     snippetItem.Click += (_, _) =>
                     {
@@ -246,20 +247,20 @@ public sealed class MenuManager : IDisposable
                     folderItem.Items.Add(snippetItem);
                 }
                 if (folderItem.Items.Count == 0)
-                    folderItem.Items.Add(new MenuItem { Header = "(empty)", IsEnabled = false });
+                    folderItem.Items.Add(new MenuItem { Header = Loc.T("menu.empty"), IsEnabled = false });
                 snippetsRoot.Items.Add(folderItem);
             }
             menu.Items.Add(snippetsRoot);
 
             var editSnippets = new MenuItem { Header = Loc.T("menu.editSnippets") };
-            editSnippets.Click += (_, _) => SnippetsWindow.ShowSingleton();
+            editSnippets.Click += (_, _) => OpenWindowFromMenu(SnippetsWindow.ShowSingleton);
             menu.Items.Add(editSnippets);
         }
         else
         {
             menu.Items.Add(new Separator());
             var editSnippets = new MenuItem { Header = Loc.T("menu.editSnippets") };
-            editSnippets.Click += (_, _) => SnippetsWindow.ShowSingleton();
+            editSnippets.Click += (_, _) => OpenWindowFromMenu(SnippetsWindow.ShowSingleton);
             menu.Items.Add(editSnippets);
         }
 
@@ -285,7 +286,7 @@ public sealed class MenuManager : IDisposable
         }
 
         var prefs = new MenuItem { Header = Loc.T("menu.preferences") };
-        prefs.Click += (_, _) => PreferencesWindow.ShowSingleton();
+        prefs.Click += (_, _) => OpenWindowFromMenu(PreferencesWindow.ShowSingleton);
         menu.Items.Add(prefs);
 
         menu.Items.Add(new Separator());
@@ -311,10 +312,10 @@ public sealed class MenuManager : IDisposable
         {
             foreach (var folder in folders)
             {
-                var folderItem = new MenuItem { Header = string.IsNullOrWhiteSpace(folder.Title) ? "(untitled)" : folder.Title };
+                var folderItem = new MenuItem { Header = string.IsNullOrWhiteSpace(folder.Title) ? Loc.T("menu.untitled") : folder.Title };
                 foreach (var snippet in folder.Snippets.Where(s => s.Enable).OrderBy(s => s.Index))
                 {
-                    var snippetItem = new MenuItem { Header = string.IsNullOrWhiteSpace(snippet.Title) ? "(untitled)" : snippet.Title };
+                    var snippetItem = new MenuItem { Header = string.IsNullOrWhiteSpace(snippet.Title) ? Loc.T("menu.untitled") : snippet.Title };
                     var captured = snippet;
                     snippetItem.Click += (_, _) =>
                     {
@@ -326,14 +327,14 @@ public sealed class MenuManager : IDisposable
                     folderItem.Items.Add(snippetItem);
                 }
                 if (folderItem.Items.Count == 0)
-                    folderItem.Items.Add(new MenuItem { Header = "(empty)", IsEnabled = false });
+                    folderItem.Items.Add(new MenuItem { Header = Loc.T("menu.empty"), IsEnabled = false });
                 menu.Items.Add(folderItem);
             }
         }
 
         menu.Items.Add(new Separator());
         var edit = new MenuItem { Header = Loc.T("menu.editSnippets") };
-        edit.Click += (_, _) => SnippetsWindow.ShowSingleton();
+        edit.Click += (_, _) => OpenWindowFromMenu(SnippetsWindow.ShowSingleton);
         menu.Items.Add(edit);
 
         return menu;
@@ -369,6 +370,13 @@ public sealed class MenuManager : IDisposable
                 _pasteService.PasteClip(clip);
         };
         return item;
+    }
+
+    private void OpenWindowFromMenu(Action showWindow)
+    {
+        _previousForeground = IntPtr.Zero;
+        if (_openMenu != null) _openMenu.IsOpen = false;
+        Application.Current.Dispatcher.BeginInvoke(showWindow, DispatcherPriority.Background);
     }
 
     private object? BuildIcon(ClipEntry clip)
@@ -449,9 +457,9 @@ public sealed class MenuManager : IDisposable
 
     private static string DisplayFallback(ClipEntry clip) => clip.PrimaryType switch
     {
-        nameof(ClipDataType.Image) => "(Image)",
-        nameof(ClipDataType.FileDrop) => "(Files)",
-        _ => "(Empty)"
+        nameof(ClipDataType.Image) => Loc.T("menu.fallback.image"),
+        nameof(ClipDataType.FileDrop) => Loc.T("menu.fallback.files"),
+        _ => Loc.T("menu.fallback.empty")
     };
 
     private string BuildTooltip(ClipEntry clip)

@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Clipy Preferences"
+        Icon="pack://application:,,,/app.ico"
         Width="560" Height="480"
         WindowStartupLocation="CenterScreen"
         ShowInTaskbar="True"
@@ -41,7 +42,7 @@
                             <ColumnDefinition Width="160"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Label Content="Max history size:" Grid.Row="0" Grid.Column="0"/>
+                        <Label x:Name="MaxHistoryLabel" Content="Max history size:" Grid.Row="0" Grid.Column="0"/>
                         <TextBox x:Name="MaxHistoryBox" Grid.Row="0" Grid.Column="1" Width="100" HorizontalAlignment="Left"/>
                         <Label x:Name="LanguageLabel" Content="Language:" Grid.Row="1" Grid.Column="0"/>
                         <ComboBox x:Name="LanguageCombo" Grid.Row="1" Grid.Column="1" Margin="0,4,0,0" DisplayMemberPath="Name" SelectedValuePath="Code"/>
@@ -51,6 +52,7 @@
                     <CheckBox x:Name="OverwriteCheck" Content="Overwrite same history entry"/>
                     <CheckBox x:Name="CopySameCheck" Content="Record duplicate copies"/>
                     <TextBlock Margin="0,12,0,0" FontStyle="Italic" Foreground="#666"
+                               x:Name="LanguageRestartHintText"
                                Text="Language changes apply after restart."/>
                 </StackPanel>
             </TabItem>
@@ -71,13 +73,13 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Label Content="Items shown inline:"      Grid.Row="0" Grid.Column="0"/>
+                        <Label x:Name="ItemsShownInlineLabel" Content="Items shown inline:" Grid.Row="0" Grid.Column="0"/>
                         <TextBox x:Name="InlineBox"                Grid.Row="0" Grid.Column="1" Width="100" HorizontalAlignment="Left"/>
-                        <Label Content="Items per sub-folder:"    Grid.Row="1" Grid.Column="0"/>
+                        <Label x:Name="ItemsPerSubFolderLabel" Content="Items per sub-folder:" Grid.Row="1" Grid.Column="0"/>
                         <TextBox x:Name="InFolderBox"             Grid.Row="1" Grid.Column="1" Width="100" HorizontalAlignment="Left"/>
-                        <Label Content="Max title length:"        Grid.Row="2" Grid.Column="0"/>
+                        <Label x:Name="MaxTitleLengthLabel" Content="Max title length:" Grid.Row="2" Grid.Column="0"/>
                         <TextBox x:Name="MaxTitleBox"             Grid.Row="2" Grid.Column="1" Width="100" HorizontalAlignment="Left"/>
-                        <Label Content="Tooltip max length:"      Grid.Row="3" Grid.Column="0"/>
+                        <Label x:Name="TooltipMaxLengthLabel" Content="Tooltip max length:" Grid.Row="3" Grid.Column="0"/>
                         <TextBox x:Name="MaxTooltipBox"           Grid.Row="3" Grid.Column="1" Width="100" HorizontalAlignment="Left"/>
                     </Grid>
 
@@ -97,7 +99,7 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0" TextWrapping="Wrap" Margin="0,0,0,8"
+                    <TextBlock x:Name="ExcludedHelpText" Grid.Row="0" TextWrapping="Wrap" Margin="0,0,0,8"
                                Text="Clipboard content copied while one of these applications is focused will not be stored. Enter the process name (without .exe)."/>
                     <ListBox Grid.Row="1" x:Name="ExcludeList"/>
                     <Grid Grid.Row="2" Margin="0,8,0,0">
@@ -116,7 +118,7 @@
             <!-- SHORTCUTS -->
             <TabItem x:Name="ShortcutsTab" Header="Shortcuts">
                 <StackPanel Margin="12">
-                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,8"
+                    <TextBlock x:Name="ShortcutHelpText" TextWrapping="Wrap" Margin="0,0,0,8"
                                Text="Click a field, then press the desired key combo. Press Escape or Backspace to clear."/>
                     <Grid Margin="0,4,0,0">
                         <Grid.RowDefinitions>
@@ -127,14 +129,14 @@
                             <ColumnDefinition Width="220"/>
                             <ColumnDefinition Width="240"/>
                         </Grid.ColumnDefinitions>
-                        <Label Content="Show history menu:"    Grid.Row="0" Grid.Column="0"/>
+                        <Label x:Name="ShowHistoryMenuLabel" Content="Show history menu:" Grid.Row="0" Grid.Column="0"/>
                         <TextBox x:Name="HistoryHotkeyBox"     Grid.Row="0" Grid.Column="1"
                                  IsReadOnly="True" Cursor="Hand"
                                  Text="Ctrl+Shift+V"
                                  PreviewKeyDown="Hotkey_PreviewKeyDown"
                                  Tag="history"/>
 
-                        <Label Content="Show snippets menu:"   Grid.Row="1" Grid.Column="0"/>
+                        <Label x:Name="ShowSnippetsMenuLabel" Content="Show snippets menu:" Grid.Row="1" Grid.Column="0"/>
                         <TextBox x:Name="SnippetHotkeyBox"     Grid.Row="1" Grid.Column="1"
                                  IsReadOnly="True" Cursor="Hand"
                                  PreviewKeyDown="Hotkey_PreviewKeyDown"
@@ -146,9 +148,9 @@
             <!-- UPDATES -->
             <TabItem x:Name="UpdatesTab" Header="Updates">
                 <StackPanel Margin="12">
-                    <TextBlock TextWrapping="Wrap"
+                    <TextBlock x:Name="UpdateHelpText" TextWrapping="Wrap"
                                Text="Configure a Velopack release feed URL to enable automatic updates. Leave empty to disable."/>
-                    <Label Content="Update feed URL:" Margin="0,12,0,0"/>
+                    <Label x:Name="UpdateFeedUrlLabel" Content="Update feed URL:" Margin="0,12,0,0"/>
                     <TextBox x:Name="UpdateUrlBox" />
                     <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                         <Button x:Name="CheckUpdateBtn" Content="Check for updates" Padding="12,4" Click="CheckUpdate_Click"/>

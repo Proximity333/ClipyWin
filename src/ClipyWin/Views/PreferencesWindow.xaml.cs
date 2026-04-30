@@ -40,11 +40,16 @@ public partial class PreferencesWindow : Window
             if (_loading) return;
             var code = LanguageCombo.SelectedValue as string;
             if (!string.IsNullOrEmpty(code))
+            {
                 _settings.Set(Constants.Settings.Culture, code);
+                Loc.Set(code);
+                ApplyLocalization();
+                SnippetsWindow.RefreshLocalization();
+            }
         };
     }
 
-    private void ApplyLocalization()
+    public void ApplyLocalization()
     {
         Title = Loc.T("prefs.title");
         GeneralTab.Header = Loc.T("prefs.tab.general");
@@ -53,6 +58,31 @@ public partial class PreferencesWindow : Window
         ShortcutsTab.Header = Loc.T("prefs.tab.shortcuts");
         UpdatesTab.Header = Loc.T("prefs.tab.updates");
         LanguageLabel.Content = Loc.T("prefs.language");
+        MaxHistoryLabel.Content = Loc.T("prefs.maxHistorySize");
+        ReorderCheck.Content = Loc.T("prefs.reorder");
+        LoginItemCheck.Content = Loc.T("prefs.loginItem");
+        OverwriteCheck.Content = Loc.T("prefs.overwriteSame");
+        CopySameCheck.Content = Loc.T("prefs.copySame");
+        LanguageRestartHintText.Text = Loc.T("prefs.languageRestartHint");
+        ItemsShownInlineLabel.Content = Loc.T("prefs.itemsShownInline");
+        ItemsPerSubFolderLabel.Content = Loc.T("prefs.itemsPerSubFolder");
+        MaxTitleLengthLabel.Content = Loc.T("prefs.maxTitleLength");
+        TooltipMaxLengthLabel.Content = Loc.T("prefs.tooltipMaxLength");
+        MarkedCheck.Content = Loc.T("prefs.numberMenuItems");
+        StartZeroCheck.Content = Loc.T("prefs.startNumberFromZero");
+        ShowTooltipCheck.Content = Loc.T("prefs.showTooltip");
+        AddClearCheck.Content = Loc.T("prefs.showClearHistoryItem");
+        AlertClearCheck.Content = Loc.T("prefs.confirmBeforeClear");
+        ExcludedHelpText.Text = Loc.T("prefs.excludedHelp");
+        ExcludeAddBtn.Content = Loc.T("common.add");
+        ExcludeRemoveBtn.Content = Loc.T("common.remove");
+        ShortcutHelpText.Text = Loc.T("prefs.shortcutHelp");
+        ShowHistoryMenuLabel.Content = Loc.T("prefs.showHistoryMenu");
+        ShowSnippetsMenuLabel.Content = Loc.T("prefs.showSnippetsMenu");
+        UpdateHelpText.Text = Loc.T("prefs.updateHelp");
+        UpdateFeedUrlLabel.Content = Loc.T("prefs.updateFeedUrl");
+        CheckUpdateBtn.Content = Loc.T("prefs.checkForUpdates");
+        ApplyUpdateBtn.Content = Loc.T("prefs.downloadAndRestart");
         CloseBtn.Content = Loc.T("prefs.close");
     }
 
@@ -68,7 +98,7 @@ public partial class PreferencesWindow : Window
 
     private async void CheckUpdate_Click(object sender, RoutedEventArgs e)
     {
-        UpdateStatusText.Text = "Checking...";
+        UpdateStatusText.Text = Loc.T("prefs.updateChecking");
         ApplyUpdateBtn.IsEnabled = false;
         _settings.Set(Constants.Settings.UpdateFeedUrl, UpdateUrlBox.Text.Trim());
         var svc = new Services.UpdateService(UpdateUrlBox.Text.Trim());
@@ -81,19 +111,19 @@ public partial class PreferencesWindow : Window
     private async void ApplyUpdate_Click(object sender, RoutedEventArgs e)
     {
         if (ApplyUpdateBtn.Tag is not Services.UpdateService svc) return;
-        UpdateStatusText.Text = "Downloading...";
+        UpdateStatusText.Text = Loc.T("prefs.updateDownloading");
         ApplyUpdateBtn.IsEnabled = false;
         var ok = await svc.DownloadAndApplyAsync();
-        UpdateStatusText.Text = ok ? "Restarting..." : "Update failed. See log for details.";
+        UpdateStatusText.Text = ok ? Loc.T("prefs.updateRestarting") : Loc.T("prefs.updateFailed");
     }
 
     private void LoadHotkeys()
     {
         var main = _settings.GetString(Constants.HotKey.MainKeyCombo, "Ctrl+Shift+V");
-        HistoryHotkeyBox.Text = string.IsNullOrEmpty(main) ? "(unassigned)" : main;
+        HistoryHotkeyBox.Text = string.IsNullOrEmpty(main) ? Loc.T("hotkey.unassigned") : main;
 
         var snippets = _settings.GetString(Constants.HotKey.SnippetKeyCombo, "");
-        SnippetHotkeyBox.Text = string.IsNullOrEmpty(snippets) ? "(unassigned)" : snippets;
+        SnippetHotkeyBox.Text = string.IsNullOrEmpty(snippets) ? Loc.T("hotkey.unassigned") : snippets;
     }
 
     private void Hotkey_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -121,7 +151,7 @@ public partial class PreferencesWindow : Window
         var key = box.Tag as string;
         var settingKey = key == "snippets" ? Constants.HotKey.SnippetKeyCombo : Constants.HotKey.MainKeyCombo;
         _settings.Set(settingKey, combo.ToString());
-        box.Text = combo.IsEmpty ? "(unassigned)" : combo.ToString();
+        box.Text = combo.IsEmpty ? Loc.T("hotkey.unassigned") : combo.ToString();
         App.ApplyHotKeys();
     }
 
@@ -235,7 +265,7 @@ public partial class PreferencesWindow : Window
         catch (Exception ex)
         {
             Utilities.Log.Error("ApplyLoginItem", ex);
-            MessageBox.Show($"Could not update login item: {ex.Message}", "Clipy", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(string.Format(Loc.T("error.loginItem"), ex.Message), "Clipy", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 

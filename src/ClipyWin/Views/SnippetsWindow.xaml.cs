@@ -7,6 +7,7 @@ using System.Xml.Linq;
 using ClipyWin.Environments;
 using ClipyWin.Models;
 using ClipyWin.Storage;
+using ClipyWin.Utilities;
 
 namespace ClipyWin.Views;
 
@@ -20,8 +21,21 @@ public partial class SnippetsWindow : Window
     public SnippetsWindow()
     {
         InitializeComponent();
+        ApplyLocalization();
         _db = AppEnvironment.Current.Db;
         Loaded += (_, _) => Reload(selectFirst: true);
+    }
+
+    private void ApplyLocalization()
+    {
+        Title = Loc.T("window.snippets");
+        AddFolderBtn.Content = "+ " + Loc.T("snippets.addFolder");
+        AddSnippetBtn.Content = "+ " + Loc.T("snippets.addSnippet");
+        DeleteBtn.Content = Loc.T("snippets.delete");
+        TitleFieldLabel.Text = Loc.T("snippets.title.field");
+        ImportBtn.Content = Loc.T("snippets.import");
+        ExportBtn.Content = Loc.T("snippets.export");
+        CloseBtn.Content = Loc.T("prefs.close");
     }
 
     public static void ShowSingleton()
@@ -39,6 +53,13 @@ public partial class SnippetsWindow : Window
         }
     }
 
+    public static void RefreshLocalization()
+    {
+        if (_instance == null || !_instance.IsLoaded) return;
+        _instance.ApplyLocalization();
+        _instance.Reload();
+    }
+
     private void Reload(bool selectFirst = false)
     {
         Tree.Items.Clear();
@@ -48,7 +69,7 @@ public partial class SnippetsWindow : Window
         {
             var folderNode = new TreeViewItem
             {
-                Header = string.IsNullOrWhiteSpace(folder.Title) ? "(untitled)" : folder.Title,
+                Header = string.IsNullOrWhiteSpace(folder.Title) ? Loc.T("snippets.untitled") : folder.Title,
                 Tag = folder,
                 IsExpanded = true
             };
@@ -56,7 +77,7 @@ public partial class SnippetsWindow : Window
             {
                 var snippetNode = new TreeViewItem
                 {
-                    Header = string.IsNullOrWhiteSpace(snippet.Title) ? "(untitled)" : snippet.Title,
+                    Header = string.IsNullOrWhiteSpace(snippet.Title) ? Loc.T("snippets.untitled") : snippet.Title,
                     Tag = snippet
                 };
                 folderNode.Items.Add(snippetNode);
@@ -126,12 +147,12 @@ public partial class SnippetsWindow : Window
         {
             case Folder f:
                 f.Title = TitleBox.Text;
-                tvi.Header = string.IsNullOrWhiteSpace(f.Title) ? "(untitled)" : f.Title;
+                tvi.Header = string.IsNullOrWhiteSpace(f.Title) ? Loc.T("snippets.untitled") : f.Title;
                 _db.Folders.Update(f);
                 break;
             case Snippet s:
                 s.Title = TitleBox.Text;
-                tvi.Header = string.IsNullOrWhiteSpace(s.Title) ? "(untitled)" : s.Title;
+                tvi.Header = string.IsNullOrWhiteSpace(s.Title) ? Loc.T("snippets.untitled") : s.Title;
                 SaveParentFolderOf(tvi);
                 break;
         }
@@ -156,7 +177,7 @@ public partial class SnippetsWindow : Window
     {
         var folder = new Folder
         {
-            Title = "New Folder",
+            Title = Loc.T("snippets.newFolder"),
             Index = Tree.Items.Count
         };
         _db.Folders.Insert(folder);
@@ -171,7 +192,7 @@ public partial class SnippetsWindow : Window
 
         var snippet = new Snippet
         {
-            Title = "New Snippet",
+            Title = Loc.T("snippets.newSnippet"),
             Content = string.Empty,
             Index = folder.Snippets.Count
         };
@@ -189,7 +210,7 @@ public partial class SnippetsWindow : Window
         switch (tvi.Tag)
         {
             case Folder f:
-                if (MessageBox.Show($"Delete folder '{f.Title}' and all its snippets?", "Clipy", MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK) return;
+                if (MessageBox.Show(string.Format(Loc.T("snippets.deleteFolderConfirm"), f.Title), "Clipy", MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK) return;
                 _db.Folders.Delete(f.Identifier);
                 break;
             case Snippet s:
@@ -208,7 +229,7 @@ public partial class SnippetsWindow : Window
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
             Filter = "Clipy snippet XML (*.xml)|*.xml|All files (*.*)|*.*",
-            Title = "Import snippets"
+            Title = Loc.T("snippets.importTitle")
         };
         if (dlg.ShowDialog() != true) return;
 
@@ -239,11 +260,11 @@ public partial class SnippetsWindow : Window
                 _db.Folders.Insert(folder);
             }
             Reload();
-            MessageBox.Show("Import complete.", "Clipy", MessageBoxButton.OK, MessageBoxImage.Information);
+             MessageBox.Show(Loc.T("snippets.importDone"), "Clipy", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Import failed: {ex.Message}", "Clipy", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(string.Format(Loc.T("snippets.importFailed"), ex.Message), "Clipy", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -252,8 +273,8 @@ public partial class SnippetsWindow : Window
         var dlg = new Microsoft.Win32.SaveFileDialog
         {
             Filter = "Clipy snippet XML (*.xml)|*.xml",
-            Title = "Export snippets",
-            FileName = "snippets.xml"
+            Title = Loc.T("snippets.exportTitle"),
+            FileName = Loc.T("snippets.exportFileName")
         };
         if (dlg.ShowDialog() != true) return;
 
@@ -275,11 +296,11 @@ public partial class SnippetsWindow : Window
                 root.Add(fe);
             }
             new XDocument(root).Save(dlg.FileName);
-            MessageBox.Show("Export complete.", "Clipy", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Loc.T("snippets.exportDone"), "Clipy", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Export failed: {ex.Message}", "Clipy", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(string.Format(Loc.T("snippets.exportFailed"), ex.Message), "Clipy", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 

@@ -41,6 +41,8 @@ public partial class App : Application
         }
 
         RunStep("AppEnvironment.Initialize", () => AppEnvironment.Initialize());
+        RunStep("LoginItem.Apply", () =>
+            LoginItem.Apply(AppEnvironment.Current.Settings.GetBool(Constants.Settings.LoginItem, false)));
         RunStep("ClipService.StartMonitoring", () => AppEnvironment.Current.ClipService.StartMonitoring());
         RunStep("DataCleanService.StartMonitoring", () => AppEnvironment.Current.DataCleanService.StartMonitoring());
         RunStep("HotKeyService.Initialize", () => AppEnvironment.Current.HotKeyService.Initialize());
