@@ -47,6 +47,10 @@ public partial class App : Application
         RunStep("DataCleanService.StartMonitoring", () => AppEnvironment.Current.DataCleanService.StartMonitoring());
         RunStep("HotKeyService.Initialize", () => AppEnvironment.Current.HotKeyService.Initialize());
         RunStep("HotKeyService.ApplyBindings", () => ApplyHotKeys());
+        RunStep("TrayService.Initialize", () =>
+            AppEnvironment.Current.TrayService.Initialize(
+                () => AppEnvironment.Current.MenuManager.ShowClipMenu(),
+                () => AppEnvironment.Current.MenuManager.ShowSnippetsMenu()));
 
         Log.Info("=== Startup complete ===");
     }

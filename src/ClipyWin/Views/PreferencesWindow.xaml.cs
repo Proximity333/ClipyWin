@@ -45,6 +45,9 @@ public partial class PreferencesWindow : Window
                 Loc.Set(code);
                 ApplyLocalization();
                 SnippetsWindow.RefreshLocalization();
+                AppEnvironment.Current.TrayService.RefreshLocalization(
+                    () => AppEnvironment.Current.MenuManager.ShowClipMenu(),
+                    () => AppEnvironment.Current.MenuManager.ShowSnippetsMenu());
             }
         };
     }

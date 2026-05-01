@@ -18,6 +18,7 @@ public sealed class AppEnvironment : IDisposable
     public ExcludeAppService ExcludeAppService { get; }
     public MenuManager MenuManager { get; }
     public UpdateService UpdateService { get; }
+    public TrayService TrayService { get; }
 
     private AppEnvironment()
     {
@@ -30,6 +31,7 @@ public sealed class AppEnvironment : IDisposable
         HotKeyService = new HotKeyService();
         MenuManager = new MenuManager(Db, Settings, PasteService);
         UpdateService = new UpdateService(Settings.GetString(Constants.Settings.UpdateFeedUrl, ""));
+        TrayService = new TrayService();
     }
 
     public static AppEnvironment Initialize()
@@ -42,6 +44,7 @@ public sealed class AppEnvironment : IDisposable
     public void Dispose()
     {
         MenuManager.Dispose();
+        TrayService.Dispose();
         HotKeyService.Dispose();
         DataCleanService.Dispose();
         ClipService.Dispose();
